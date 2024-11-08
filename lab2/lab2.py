@@ -1,15 +1,10 @@
 import dimacs
-# import os
-# import time
 from collections import deque
 
 import sys
 sys.path.insert(0, "../utils")
 from test import Test
 import utils as ut
-
-# from utils.test import Test
-# import utils.utils as ut
 
 def get_parents_bfs(graphMatrix, flow, visited, visitedId, source, target):
     V = len(graphMatrix)
@@ -82,34 +77,7 @@ def update_flow(graphMatrix, flow, target, parents):
         flow[vertex][prev] -= bottleneck
         prev, vertex = parents[prev], prev
 
-
-def ford_fulkerson(graphMatrix, source, target, get_parents_method):
-    V = len(graphMatrix)
-    flow = [[0 for _ in range(V)] for _ in range(V)]
-
-    visited = [0 for _ in range(V)]
-    visitedId = 0
-
-    while True:
-        visitedId += 1
-
-        foundPath, parents = get_parents_method(graphMatrix, flow, visited, visitedId, source, target)
-
-        if not foundPath:
-            break
-
-        # print(foundPath)
-        # print(parents)
-
-        update_flow(graphMatrix, flow, target, parents)
-
-    maxFlow = 0
-    for vertex in range(V):
-        maxFlow += flow[vertex][target]
-
-    return maxFlow
-
-def ford_fulkerson_for_test(graphMatrix, V, source, get_parents_method):
+def ford_fulkerson(graphMatrix, V, source, get_parents_method):
     target = V - 1
     flow = [[0 for _ in range(V)] for _ in range(V)]
 
@@ -123,9 +91,6 @@ def ford_fulkerson_for_test(graphMatrix, V, source, get_parents_method):
 
         if not foundPath:
             break
-
-        # print(foundPath)
-        # print(parents)
 
         update_flow(graphMatrix, flow, target, parents)
 
@@ -146,75 +111,7 @@ def edges_to_directed_weighted_matrix(graphEdges, V):
 
     return matrix
 
-# def test_graph(graphName: str, flow_function):
-#     pathToFile = os.path.join(graphsDir, graphName)
-#     V, graphEdges = dimacs.loadDirectedWeightedGraph(pathToFile)
-
-#     source = 0
-#     target = V - 1
-#     graphMatrix = edges_to_directed_weighted_matrix(graphEdges, V)
-#     print(*graphMatrix, sep="\n")
-#     solution = int(dimacs.readSolution(pathToFile))
-#     print(solution)
-#     mySolution = flow_function(graphMatrix, source, target)
-#     print(mySolution)
-
-# def test_function(flow_function):
-#     passed = 0
-#     failed = 0
-#     total = 0
-
-#     for fileName in os.listdir(graphsDir):
-#         print(f"\n\n######### {fileName} #########\n\n")
-
-#         pathToFile = os.path.join(graphsDir, fileName)
-#         V, graphEdges = dimacs.loadDirectedWeightedGraph(pathToFile)
-
-#         source = 0
-#         target = V - 1
-#         graphMatrix = edges_to_directed_weighted_matrix(graphEdges, V)
-
-#         # test bfs approach
-#         startBfs = time.time()
-#         mySolutionBfs = flow_function(graphMatrix, source, target, get_parents_bfs)
-#         endBfs = time.time()
-#         timeElapsedBfs = endBfs - startBfs
-
-#         # test dfs approach
-#         startDfs = time.time()
-#         mySolutionDfs = flow_function(graphMatrix, source, target, get_parents_dfs)
-#         endDfs = time.time()
-#         timeElapsedDfs = endDfs - startDfs
-
-#         solution = int(dimacs.readSolution(pathToFile))
-
-#         testStatusMessage = "PASSED"
-#         if solution == mySolutionBfs == mySolutionDfs:
-#             passed += 1
-#         else:
-#             testStatusMessage = "FAILED"
-#             failed += 1
-
-#         print(f"correct solution: {solution}")
-#         print(f"my solution bfs: {mySolutionBfs}")
-#         print(f"time (BFS): {timeElapsedBfs:.3f} [s]")
-#         print(f"my solution dfs: {mySolutionDfs}")
-#         print(f"time (DFS): {timeElapsedDfs:.3f} [s]")
-#         print()
-#         print(f"test status: {testStatusMessage}")
-
-#         total += 1
-
-#     print("\nsummarize:")
-#     print(f"passed: {passed}/{total}")
-#     print(f"failed: {failed}/{total}")
-
-def test():
-    graphsDir = "./flow"
-    myTest = Test(graphsDir, dimacs.loadDirectedWeightedGraph, dimacs.readSolution, ut.edges_to_directed_weighted_matrix, ford_fulkerson_for_test, 0, get_parents_bfs)
-    myTest.test_function()
-
 if __name__ == "__main__":
     graphsDir = "./flow"
-    # test_function(ford_fulkerson)
-    test()
+    myTest = Test(graphsDir, dimacs.loadDirectedWeightedGraph, dimacs.readSolution, ut.edges_to_directed_weighted_matrix, ford_fulkerson, 0, get_parents_bfs)
+    myTest.test_function()
