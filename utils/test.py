@@ -79,7 +79,7 @@ class Test:
         print()
         print(f"test status: {testStatusMessage}")
 
-    def test_function(self):
+    def test_all(self):
         for fileName in os.listdir(self.graphsDir):
             self.test_graph(fileName)
         self.summarize()

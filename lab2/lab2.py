@@ -114,4 +114,4 @@ def edges_to_directed_weighted_matrix(graphEdges, V):
 if __name__ == "__main__":
     graphsDir = "./flow"
     myTest = Test(graphsDir, dimacs.loadDirectedWeightedGraph, dimacs.readSolution, ut.edges_to_directed_weighted_matrix, ford_fulkerson, 0, get_parents_bfs)
-    myTest.test_function()
+    myTest.test_all()

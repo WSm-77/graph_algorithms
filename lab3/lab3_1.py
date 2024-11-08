@@ -1,12 +1,9 @@
+from collections import deque
+
 import dimacs
-import os
 import sys
 sys.path.insert(0, "../utils")
 from test import Test
-import time
-from collections import deque
-
-
 
 def get_parents_bfs(graphMatrix, flow, visited, visitedId, source, target):
     V = len(graphMatrix)
@@ -69,9 +66,6 @@ def ford_fulkerson(graphMatrix, source, target, get_parents_method):
         if not foundPath:
             break
 
-        # print(foundPath)
-        # print(parents)
-
         update_flow(graphMatrix, flow, target, parents)
 
     maxFlow = 0
@@ -103,81 +97,10 @@ def min_cut(graphMatrix, V):
     for t in range(1, V):
         results.append(ford_fulkerson(graphMatrix, s, t, get_parents_bfs))
         cnt += 1
-        print(f"{cnt}. min_cut")
 
     return min(results)
 
-def test_graph(graphName: str, flow_function):
-    pathToFile = os.path.join(graphsDir, graphName)
-    V, graphEdges = dimacs.loadWeightedGraph(pathToFile)
-    print(sorted(graphEdges))
-
-    source = 0
-    target = V - 1
-    graphMatrix = edges_to_weighted_matrix(graphEdges, V)
-
-    print(*graphMatrix, sep="\n")
-
-    solution = int(dimacs.readSolution(pathToFile))
-
-    print(solution)
-
-    mySolution = flow_function(graphMatrix, source, target, get_parents_bfs)
-
-    print(mySolution)
-
-def test_function(flow_function):
-    passed = 0
-    failed = 0
-    total = 0
-
-    for fileName in os.listdir(graphsDir):
-        print(f"\n\n######### {fileName} #########\n\n")
-
-        pathToFile = os.path.join(graphsDir, fileName)
-        V, graphEdges = dimacs.loadDirectedWeightedGraph(pathToFile)
-
-        source = 0
-        target = V - 1
-        graphMatrix = edges_to_weighted_matrix(graphEdges, V)
-
-        # test bfs approach
-        startBfs = time.time()
-        mySolutionBfs = flow_function(graphMatrix, source, target, get_parents_bfs)
-        endBfs = time.time()
-        timeElapsedBfs = endBfs - startBfs
-
-        solution = int(dimacs.readSolution(pathToFile))
-
-        testStatusMessage = "PASSED"
-        if solution == mySolutionBfs:
-            passed += 1
-        else:
-            testStatusMessage = "FAILED"
-            failed += 1
-
-        print(f"correct solution: {solution}")
-        print(f"my solution bfs: {mySolutionBfs}")
-        print(f"time (BFS): {timeElapsedBfs:.3f} [s]")
-        print()
-        print(f"test status: {testStatusMessage}")
-
-        total += 1
-
-    print("\nsummarize:")
-    print(f"passed: {passed}/{total}")
-    print(f"failed: {failed}/{total}")
-
-def test():
-    graphsDir = "./graphs"
-    myTest = Test(graphsDir, dimacs.loadDirectedWeightedGraph, dimacs.readSolution, edges_to_weighted_matrix, min_cut)
-    myTest.test_graph("cycle")
-    myTest.test_function()
-
-
 if __name__ == "__main__":
     graphsDir = "./graphs"
-    # test_function(ford_fulkerson)
-    # test_graph("cycle", min_cut)
-    test()
-
+    myTest = Test(graphsDir, dimacs.loadDirectedWeightedGraph, dimacs.readSolution, edges_to_weighted_matrix, min_cut)
+    myTest.test_all()

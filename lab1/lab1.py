@@ -45,5 +45,5 @@ def tour_guide_find_union(graphEdges, V, source, target):
 if __name__ == "__main__":
     graphsDir = "./graphs"
     myTest = Test(graphsDir, dimacs.loadWeightedGraph, dimacs.readSolution, lambda x, y: x, tour_guide_find_union, 1, 2)
-    myTest.test_function()
+    myTest.test_all()
 
