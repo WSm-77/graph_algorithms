@@ -1,5 +1,7 @@
+NO_EDGE = 0
+INF = float("inf")
+
 def edges_to_directed_weighted_matrix(graphEdges, V):
-    NO_EDGE = 0
     matrix = [[NO_EDGE for _ in range(V)] for _ in range(V)]
 
     for vertex, neighbour, weight in graphEdges:
@@ -10,7 +12,6 @@ def edges_to_directed_weighted_matrix(graphEdges, V):
     return matrix
 
 def edges_to_weighted_matrix(graphEdges, V):
-    NO_EDGE = 0
     matrix = [[NO_EDGE for _ in range(V)] for _ in range(V)]
 
     for vertex, neighbour, weight in graphEdges:
