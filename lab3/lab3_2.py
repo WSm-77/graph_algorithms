@@ -5,6 +5,8 @@ sys.path.insert(0, "../utils")
 import utils
 from test import Test
 
+INF = float("inf")
+
 class Vertex:
     def __init__(self, idx) -> None:
         self.idx = idx
@@ -64,7 +66,12 @@ class Graph:
             vertex1, vertex2 = vertex2, vertex1
 
         for neighbourIdx, weight in self.verticies[vertex2].get_edges():
+            if neighbourIdx == vertex1:
+                continue
+
             self.verticies[vertex1].add_edge(neighbourIdx, weight)
+            self.verticies[neighbourIdx].add_edge(vertex1, weight)
+            self.verticies[neighbourIdx].delete_edge(vertex2)
 
         if vertex2 in self.verticies[vertex1].edges:
             self.verticies[vertex1].delete_edge(vertex2)
@@ -74,23 +81,24 @@ class Graph:
     def __len__(self):
         return len(self.verticies)
 
-def get_cut(graph: Graph):
-    verticiesIndiciesList = graph.get_verticies_list()
-    firstVertex = verticiesIndiciesList[0]
-
-    remainingVerticies = set(verticiesIndiciesList[1:])
-
-    V = len(verticiesIndiciesList)
+def get_cut(graph: Graph, fixedVertex):
     cutVerticiesIndiciesSet = set()
-    cutVerticiesIndiciesSet.add(firstVertex)
+    cutVerticiesIndiciesSet.add(fixedVertex)
 
-    minConnectivityVertex = firstVertex
+    remainingVerticies = set()
+    for vertex in graph.get_verticies_list():
+        if vertex == fixedVertex:
+            continue
+
+        remainingVerticies.add(vertex)
+
+    minConnectivityVertex = fixedVertex
 
     while len(remainingVerticies) > 1:
-        minConnectivity = utils.INF
+        minConnectivity = 0
         for vertex in remainingVerticies:
             connectivity = graph.get_connectivity_weight(vertex, cutVerticiesIndiciesSet)
-            if connectivity < minConnectivity:
+            if connectivity > minConnectivity:
                 minConnectivity = connectivity
                 minConnectivityVertex = vertex
 
@@ -107,12 +115,14 @@ def get_cut(graph: Graph):
     return currentCut
 
 def stoer_wagner(edgesList, V):
+    # choose one vertex, that will always start cut
+    fixedVertexIdx = edgesList[0][0]
     graph = Graph(edgesList, V)
 
-    minCut = utils.INF
+    minCut = INF
 
     while len(graph) > 1:
-        currentCut = get_cut(graph)
+        currentCut = get_cut(graph, fixedVertexIdx)
         minCut = min(minCut, currentCut)
 
     return minCut
@@ -120,5 +130,4 @@ def stoer_wagner(edgesList, V):
 if __name__ == "__main__":
     graphsDir = "./graphs"
     myTest = Test(graphsDir, dimacs.loadWeightedGraph, dimacs.readSolution, lambda x, *args: x, stoer_wagner)
-    # myTest.test_graph("path")
     myTest.test_all()
