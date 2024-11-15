@@ -1,9 +1,7 @@
 import dimacs
 
-import sys
-sys.path.insert(0, "../utils")
-import utils
-from test import Test
+from utils.test import Test
+from utils.utils import INF
 
 class Vertex:
     def __init__(self, idx) -> None:
@@ -117,7 +115,7 @@ def stoer_wagner(edgesList, V):
     fixedVertexIdx = edgesList[0][0]
     graph = Graph(edgesList, V)
 
-    minCut = utils.INF
+    minCut = INF
 
     while len(graph) > 1:
         currentCut = get_cut(graph, fixedVertexIdx)

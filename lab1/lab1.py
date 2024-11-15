@@ -1,7 +1,5 @@
-import sys
-sys.path.insert(0, "../utils")
-from test import Test
-import dimacs
+from utils.test import Test
+from utils import dimacs
 
 
 class FindUnion:

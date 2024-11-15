@@ -1,9 +1,7 @@
 from collections import deque
 
-import dimacs
-import sys
-sys.path.insert(0, "../utils")
-from test import Test
+from utils.test import Test
+from utils import dimacs
 
 def get_parents_bfs(graphMatrix, flow, visited, visitedId, source, target):
     V = len(graphMatrix)
