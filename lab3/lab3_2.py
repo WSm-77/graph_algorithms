@@ -5,8 +5,6 @@ sys.path.insert(0, "../utils")
 import utils
 from test import Test
 
-INF = float("inf")
-
 class Vertex:
     def __init__(self, idx) -> None:
         self.idx = idx
@@ -119,7 +117,7 @@ def stoer_wagner(edgesList, V):
     fixedVertexIdx = edgesList[0][0]
     graph = Graph(edgesList, V)
 
-    minCut = INF
+    minCut = utils.INF
 
     while len(graph) > 1:
         currentCut = get_cut(graph, fixedVertexIdx)
