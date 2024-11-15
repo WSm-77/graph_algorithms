@@ -1,6 +1,9 @@
+import dimacs
+
 import sys
 sys.path.insert(0, "../utils")
 import utils
+from test import Test
 
 class Vertex:
     def __init__(self, idx) -> None:
@@ -19,6 +22,12 @@ class Vertex:
             weightsSum += self.edges[vertexIdx]
 
         return weightsSum
+
+    def get_edges(self):
+        return self.edges.items()
+
+    def delete_edge(self, neighbourIdx):
+        del self.edges[neighbourIdx]
 
     def __hash__(self) -> int:
         return hash(self.idx)
@@ -47,25 +56,33 @@ class Graph:
         return self.verticies[vertexIdx].get_weights_sum(verticiesIndicies)
 
     def get_verticies_list(self):
-        return self.verticies.keys()
+        return list(self.verticies.keys())
 
-    # TODO: implement
     def merge(self, vertex1, vertex2):
-        pass
+        # ensure that vertex1 has lower index
+        if vertex2 < vertex1:
+            vertex1, vertex2 = vertex2, vertex1
+
+        for neighbourIdx, weight in self.verticies[vertex2].get_edges():
+            self.verticies[vertex1].add_edge(neighbourIdx, weight)
+
+        if vertex2 in self.verticies[vertex1].edges:
+            self.verticies[vertex1].delete_edge(vertex2)
+
+        del self.verticies[vertex2]
 
     def __len__(self):
         return len(self.verticies)
 
 def get_cut(graph: Graph):
-    # TODO: implement
-
     verticiesIndiciesList = graph.get_verticies_list()
     firstVertex = verticiesIndiciesList[0]
 
     remainingVerticies = set(verticiesIndiciesList[1:])
 
     V = len(verticiesIndiciesList)
-    cutVerticiesIndiciesSet = set(firstVertex)
+    cutVerticiesIndiciesSet = set()
+    cutVerticiesIndiciesSet.add(firstVertex)
 
     minConnectivityVertex = firstVertex
 
@@ -85,7 +102,6 @@ def get_cut(graph: Graph):
 
     lastMinConnectivityVertex = minConnectivityVertex
 
-    # TODO: modify graph; merge
     graph.merge(lastMinConnectivityVertex, lastVertex)
 
     return currentCut
@@ -100,3 +116,9 @@ def stoer_wagner(edgesList, V):
         minCut = min(minCut, currentCut)
 
     return minCut
+
+if __name__ == "__main__":
+    graphsDir = "./graphs"
+    myTest = Test(graphsDir, dimacs.loadWeightedGraph, dimacs.readSolution, lambda x, *args: x, stoer_wagner)
+    # myTest.test_graph("path")
+    myTest.test_all()
