@@ -112,7 +112,7 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
             isOnLordsRoute = True
 
         if isOnLordsRoute:
-            vertexProtectors[vertex].add(lordID)
+            vertexProtectors[vertex].append(lordID)
 
         return isOnLordsRoute
     # end def
@@ -120,7 +120,7 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
     V = len(royalRouteGraph)
 
     streetObjects = {(vertex, neighbour) : Street(weight) for vertex, neighbour, weight in royalRouteEdges}
-    vertexProtectors = {vertex : set() for vertex in range(1, V + 1)}
+    vertexProtectors = {vertex : [] for vertex in range(1, V + 1)}
     lordsRoutesLengths = {}
 
     visitedIDs = {vertex : None for vertex in range(1, V + 1)}
