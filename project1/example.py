@@ -26,6 +26,15 @@ class FindUnion:
 
         return True
 
+def get_adjustancy_list_graph(V: int, graphEdges: list[tuple[int, int, int]]) -> dict[int, set[int]]:
+    graph = {vertex : set() for vertex in range(1, V + 1)}
+
+    for vertex, neighbour, weight in graphEdges:
+        graph[vertex].add((neighbour, weight))
+        graph[neighbour].add((vertex, weight))
+
+    return graph
+
 def get_mst(V: int, graphEdges: list[tuple[int, int, int]]) -> list[tuple[int, int, int]]:
     """
     Get Minimal Spanning Tree of given graph
@@ -54,9 +63,13 @@ def get_mst(V: int, graphEdges: list[tuple[int, int, int]]) -> list[tuple[int, i
     return mstEdges
 
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
-    streets = get_mst(V, streets)
+    royalRouteEdges = get_mst(V, streets)
 
     print(streets)
+
+    royalRouteGraph = get_adjustancy_list_graph(V, royalRouteEdges)
+
+    print(royalRouteGraph)
 
 solve(6, [
     (1, 2, 4),
