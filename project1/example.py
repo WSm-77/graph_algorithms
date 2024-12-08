@@ -134,7 +134,36 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
 
     return streetObjects, lordsRoutesLengths, vertexProtectors
 
+def get_non_coliding_lords_graph(colisionGraph: dict[int, set[int]], lordsCnt):
+    lordsSet = {lordID for lordID in range(lordsCnt)}
+
+    noColisionsGraph = {}
+
+    for vertex in colisionGraph.keys():
+        noColisionsGraph[vertex] = lordsSet - colisionGraph[vertex] - {vertex}
+
+    return noColisionsGraph
+
+def get_coliding_lords_graph(V, lordsCnt, vertexProtectors):
+    colisionsGraph = {lordID : set() for lordID in range(lordsCnt)}
+
+    for vertex in range(1, V + 1):
+        colidingLordsList = vertexProtectors[vertex]
+
+        numberOfColidingLords = len(colidingLordsList)
+
+        for firstLordIdx in range(numberOfColidingLords):
+            firstLordID = colidingLordsList[firstLordIdx]
+            for secondLordIdx in range(firstLordIdx + 1, numberOfColidingLords):
+                secondLordID = colidingLordsList[secondLordIdx]
+                colisionsGraph[firstLordID].add(secondLordID)
+                colisionsGraph[secondLordID].add(firstLordID)
+
+    return colisionsGraph
+
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
+    lordsCnt = len(lords)
+
     royalRouteEdges = get_mst(V, streets)
 
     print(streets)
@@ -148,6 +177,14 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     print(lordsRoutesLengths)
     print(*map(lambda x: (x, streetObjects[x].get_protectors()), streetObjects))
     print(vertexProtectors)
+
+    colisionGraph = get_coliding_lords_graph(V, lordsCnt, vertexProtectors)
+
+    print(colisionGraph)
+
+    nonColisionGraph = get_non_coliding_lords_graph(colisionGraph, lordsCnt)
+
+    print(nonColisionGraph)
 
 solve(6, [
     (1, 2, 4),
