@@ -2,8 +2,8 @@ from data import runtests
 
 class FindUnion:
     def __init__(self, V) -> None:
-        self.representants = {vertex : vertex for vertex in range(1, V+1)}
-        self.levels = {vertex : 0 for vertex in range(1, V+1)}
+        self.representants = {vertex : vertex for vertex in range(1, V + 1)}
+        self.levels = {vertex : 0 for vertex in range(1, V + 1)}
 
     def find(self, vertex):
         if self.representants[vertex] != vertex:
@@ -111,15 +111,19 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
         if vertex in lordCities:
             isOnLordsRoute = True
 
+        if isOnLordsRoute:
+            vertexProtectors[vertex].add(lordID)
+
         return isOnLordsRoute
     # end def
 
     V = len(royalRouteGraph)
 
     streetObjects = {(vertex, neighbour) : Street(weight) for vertex, neighbour, weight in royalRouteEdges}
+    vertexProtectors = {vertex : set() for vertex in range(1, V + 1)}
     lordsRoutesLengths = {}
 
-    visitedIDs = {vertex : None for vertex in range(1, V+1)}
+    visitedIDs = {vertex : None for vertex in range(1, V + 1)}
 
     for lordID, lordCities in enumerate(lords):
         startCity = lordCities[0]
@@ -128,7 +132,7 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
 
         dfs_visit(startCity)
 
-    return streetObjects, lordsRoutesLengths
+    return streetObjects, lordsRoutesLengths, vertexProtectors
 
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     royalRouteEdges = get_mst(V, streets)
@@ -139,10 +143,11 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
 
     print(royalRouteGraph)
 
-    streetObjects, lordsRoutesLengths = lords_protection(royalRouteEdges, royalRouteGraph, lords)
+    streetObjects, lordsRoutesLengths, vertexProtectors = lords_protection(royalRouteEdges, royalRouteGraph, lords)
 
     print(lordsRoutesLengths)
     print(*map(lambda x: (x, streetObjects[x].get_protectors()), streetObjects))
+    print(vertexProtectors)
 
 solve(6, [
     (1, 2, 4),
