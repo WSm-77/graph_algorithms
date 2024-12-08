@@ -26,6 +26,11 @@ class FindUnion:
 
         return True
 
+def min_max(val1, val2):
+    if val2 < val1:
+        val1, val2 = val2, val1
+    return val1, val2
+
 def get_adjustancy_list_graph(V: int, graphEdges: list[tuple[int, int, int]]) -> dict[int, set[int]]:
     graph = {vertex : set() for vertex in range(1, V + 1)}
 
@@ -55,8 +60,13 @@ def get_mst(V: int, graphEdges: list[tuple[int, int, int]]) -> list[tuple[int, i
     for vertex, neighbour, weight in graphEdges:
         # check if current edge can be added to MST
         if unionStruct.union(vertex, neighbour):
+            # make sure that vertex < neighbour
+            vertex, neighbour = min_max(vertex, neighbour)
+
             mstEdges.append((vertex, neighbour, weight))
             edgesLeft -= 1
+
+            # check if MST is already created
             if edgesLeft == 0:
                 break
 
