@@ -30,8 +30,8 @@ def get_adjustancy_list_graph(V: int, graphEdges: list[tuple[int, int, int]]) ->
     graph = {vertex : set() for vertex in range(1, V + 1)}
 
     for vertex, neighbour, weight in graphEdges:
-        graph[vertex].add((neighbour, weight))
-        graph[neighbour].add((vertex, weight))
+        graph[vertex].add(neighbour)
+        graph[neighbour].add(vertex)
 
     return graph
 
