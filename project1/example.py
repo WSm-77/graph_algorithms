@@ -26,6 +26,20 @@ class FindUnion:
 
         return True
 
+class Street:
+    def __init__(self, weight):
+        self.weight = weight
+        self.protectors = set()
+
+    def get_weight(self):
+        return self.weight
+
+    def get_protectors(self):
+        return self.protectors
+
+    def add_protector(self, protector: int):
+        self.protectors.add(protector)
+
 def min_max(val1, val2):
     if val2 < val1:
         val1, val2 = val2, val1
@@ -72,6 +86,50 @@ def get_mst(V: int, graphEdges: list[tuple[int, int, int]]) -> list[tuple[int, i
 
     return mstEdges
 
+def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGraph: dict[int, set[int]], lords: list[int]):
+    def dfs_visit(vertex):
+        nonlocal lordID, lordCities, royalRouteGraph, visitedIDs
+
+        visitedIDs[vertex] = lordID
+
+        isOnLordsRoute = False
+
+        for neighbour in royalRouteGraph[vertex]:
+            if visitedIDs[neighbour] == lordID:
+                continue
+
+            # check if edge (vertex, neighbour) is protected by current lord
+            if dfs_visit(neighbour):
+                isOnLordsRoute = True
+
+                orderedStreetTuple = (min_max(vertex, neighbour))
+                currentStreetObject = streetObjects[orderedStreetTuple]
+
+                currentStreetObject.add_protector(lordID)
+                lordsRoutesLengths[lordID] += currentStreetObject.get_weight()
+
+        if vertex in lordCities:
+            isOnLordsRoute = True
+
+        return isOnLordsRoute
+    # end def
+
+    V = len(royalRouteGraph)
+
+    streetObjects = {(vertex, neighbour) : Street(weight) for vertex, neighbour, weight in royalRouteEdges}
+    lordsRoutesLengths = {}
+
+    visitedIDs = {vertex : None for vertex in range(1, V+1)}
+
+    for lordID, lordCities in enumerate(lords):
+        startCity = lordCities[0]
+        lordsRoutesLengths[lordID] = 0
+        lordCities = set(lordCities)
+
+        dfs_visit(startCity)
+
+    return streetObjects, lordsRoutesLengths
+
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     royalRouteEdges = get_mst(V, streets)
 
@@ -80,6 +138,11 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     royalRouteGraph = get_adjustancy_list_graph(V, royalRouteEdges)
 
     print(royalRouteGraph)
+
+    streetObjects, lordsRoutesLengths = lords_protection(royalRouteEdges, royalRouteGraph, lords)
+
+    print(lordsRoutesLengths)
+    print(*map(lambda x: (x, streetObjects[x].get_protectors()), streetObjects))
 
 solve(6, [
     (1, 2, 4),
