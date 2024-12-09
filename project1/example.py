@@ -26,20 +26,6 @@ class FindUnion:
 
         return True
 
-class Street:
-    def __init__(self, weight):
-        self.weight = weight
-        self.protectors = set()
-
-    def get_weight(self):
-        return self.weight
-
-    def get_protectors(self):
-        return self.protectors
-
-    def add_protector(self, protector: int):
-        self.protectors.add(protector)
-
 def min_max(val1, val2):
     if val2 < val1:
         val1, val2 = val2, val1
@@ -103,10 +89,8 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
                 isOnLordsRoute = True
 
                 orderedStreetTuple = (min_max(vertex, neighbour))
-                currentStreetObject = streetObjects[orderedStreetTuple]
-
-                currentStreetObject.add_protector(lordID)
-                lordsRoutesLengths[lordID] += currentStreetObject.get_weight()
+                weight = streetObjects[orderedStreetTuple]
+                lordsRoutesLengths[lordID] += weight
 
         if vertex in lordCities:
             isOnLordsRoute = True
@@ -119,7 +103,8 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
 
     V = len(royalRouteGraph)
 
-    streetObjects = {(vertex, neighbour) : Street(weight) for vertex, neighbour, weight in royalRouteEdges}
+    streetObjects = {(vertex, neighbour) : weight for vertex, neighbour, weight in royalRouteEdges}
+
     vertexProtectors = {vertex : [] for vertex in range(1, V + 1)}
     lordsRoutesLengths = {}
 
@@ -175,7 +160,7 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     streetObjects, lordsRoutesLengths, vertexProtectors = lords_protection(royalRouteEdges, royalRouteGraph, lords)
 
     print(lordsRoutesLengths)
-    print(*map(lambda x: (x, streetObjects[x].get_protectors()), streetObjects))
+    print(streetObjects)
     print(vertexProtectors)
 
     colisionGraph = get_coliding_lords_graph(V, lordsCnt, vertexProtectors)
