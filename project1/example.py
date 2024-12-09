@@ -1,4 +1,7 @@
 from data import runtests
+import sys
+
+sys.setrecursionlimit(10_000)
 
 class FindUnion:
     def __init__(self, V) -> None:
