@@ -146,6 +146,54 @@ def get_coliding_lords_graph(V, lordsCnt, vertexProtectors):
 
     return colisionsGraph
 
+def get_max_cliques(nonColisionGraph: dict[int, set[int]]):
+    maxCliquesList: list[set[int]] = []
+    potentialCliques: list[tuple[set[int], set[int]]] = []
+
+    for lordID in nonColisionGraph.keys():
+        toDeleteIndicies = []
+
+        neighbourLordsSet = nonColisionGraph[lordID]
+
+        if not neighbourLordsSet:
+            maxCliquesList.append({lordID})
+            continue
+
+        for idx in range(len(potentialCliques)):
+
+            superVertex, potentialLordsInSuperVertex = potentialCliques[idx]
+
+            if lordID in potentialLordsInSuperVertex:
+                neighbourLordsIntersection = potentialLordsInSuperVertex & neighbourLordsSet
+                remainingNeighbourLords = potentialLordsInSuperVertex - neighbourLordsIntersection - {lordID}
+
+                # add current lord to super vertex
+                extendedSuperVertex = superVertex | {lordID}
+
+                if neighbourLordsIntersection:
+                    potentialCliques[idx] = (extendedSuperVertex, neighbourLordsIntersection)
+                else:
+                    maxCliquesList.append(extendedSuperVertex)
+                    toDeleteIndicies.append(idx)
+
+                if remainingNeighbourLords:
+                    potentialCliques.append((superVertex, remainingNeighbourLords))
+
+        neighbourLordsSet = neighbourLordsSet - {checkedLordID for checkedLordID in range(lordID)}
+
+        if neighbourLordsSet:
+            potentialCliques.append(({lordID}, neighbourLordsSet))
+
+        # remove finished cliques
+        deletedCnt = 0
+        for toDeleteInOriginalListIdx in toDeleteIndicies:
+            toDeleteIndex = toDeleteInOriginalListIdx - deletedCnt
+
+            del potentialCliques[toDeleteIndex]
+            deletedCnt += 1
+
+    return maxCliquesList
+
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     lordsCnt = len(lords)
 
@@ -171,7 +219,21 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
 
     print(nonColisionGraph)
 
-solve(6, [
+    maxCliques = get_max_cliques(nonColisionGraph)
+
+    print(maxCliques)
+
+    maxSum = 0
+    for maxClique in maxCliques:
+        currentSum = 0
+        for lordID in maxClique:
+            currentSum += lordsRoutesLengths[lordID]
+
+        maxSum = max(maxSum, currentSum)
+
+    return maxSum
+
+result = solve(6, [
     (1, 2, 4),
     (2, 3, 5),
     (3, 4, 6),
@@ -183,5 +245,7 @@ solve(6, [
     [1, 3],
     [2, 5],
     [4, 6]])
+
+print(result)
 
 # runtests(solve)
