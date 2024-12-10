@@ -16,26 +16,26 @@ class LordsProtection(unittest.TestCase):
         with open(fileName, "r") as file:
             data = json.load(file)
 
-        self.V = data["V"]
-        self.streets = data["streets"]
-        self.lords = data["lords"]
-        self.royalRouteEdges = list(map(tuple, data["royalRouteEdges"]))
-        self.verticiesProtectors = self.json_data_to_dict_graph(data["verticiesProtectors"], int)
+        V = data["V"]
+        streets = data["streets"]
+        lords = data["lords"]
+        royalRouteEdges = list(map(tuple, data["royalRouteEdges"]))
+        verticiesProtectors = self.json_data_to_dict_graph(data["verticiesProtectors"], int)
 
-        print(self.V)
-        print(self.streets)
-        print(self.lords)
-        print(self.royalRouteEdges)
-        print(self.verticiesProtectors)
+        # print(V)
+        # print(streets)
+        # print(lords)
+        # print(royalRouteEdges)
+        # print(verticiesProtectors)
 
         # when
-        royalRouteEdges = get_mst(self.V, self.streets)
+        royalRouteEdges = get_mst(V, streets)
 
-        actualVerticiesProtectors = lords_protection(royalRouteEdges, get_adjustancy_list_graph(self.V, royalRouteEdges), self.lords)[1]
+        actualVerticiesProtectors = lords_protection(royalRouteEdges, get_adjustancy_list_graph(V, royalRouteEdges), lords)[1]
 
         # then
-        self.assertEqual(royalRouteEdges, self.royalRouteEdges)
-        self.assertEqual(actualVerticiesProtectors, self.verticiesProtectors)
+        self.assertEqual(royalRouteEdges, royalRouteEdges)
+        self.assertEqual(actualVerticiesProtectors, verticiesProtectors)
 
 if __name__ == "__main__":
     unittest.main()
