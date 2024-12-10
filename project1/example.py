@@ -153,22 +153,25 @@ def get_max_cliques(nonColisionGraph: dict[int, set[int]]):
     maxCliquesList: list[set[int]] = []
     potentialCliques: list[tuple[set[int], set[int]]] = []
 
-    for lordID in nonColisionGraph.keys():
+    for lordID in range(len(nonColisionGraph)):
         toDeleteIndicies = []
 
-        neighbourLordsSet = nonColisionGraph[lordID]
+        neighbourLordsSet = nonColisionGraph[lordID] - {checkedLordID for checkedLordID in range(lordID)}
+        neighbourLordsSetCopy = {neighbour for neighbour in neighbourLordsSet}
 
-        if not neighbourLordsSet:
-            maxCliquesList.append({lordID})
-            continue
+        isAddedToSuperVertex = False
 
         for idx in range(len(potentialCliques)):
 
             superVertex, potentialLordsInSuperVertex = potentialCliques[idx]
 
             if lordID in potentialLordsInSuperVertex:
+                isAddedToSuperVertex = True
+
                 neighbourLordsIntersection = potentialLordsInSuperVertex & neighbourLordsSet
                 remainingNeighbourLords = potentialLordsInSuperVertex - neighbourLordsIntersection - {lordID}
+
+                neighbourLordsSetCopy = neighbourLordsSetCopy - neighbourLordsIntersection
 
                 # add current lord to super vertex
                 extendedSuperVertex = superVertex | {lordID}
@@ -182,10 +185,11 @@ def get_max_cliques(nonColisionGraph: dict[int, set[int]]):
                 if remainingNeighbourLords:
                     potentialCliques.append((superVertex, remainingNeighbourLords))
 
-        neighbourLordsSet = neighbourLordsSet - {checkedLordID for checkedLordID in range(lordID)}
-
-        if neighbourLordsSet:
-            potentialCliques.append(({lordID}, neighbourLordsSet))
+        if neighbourLordsSetCopy:
+            potentialCliques.append(({lordID}, neighbourLordsSetCopy))
+        else:
+            if not isAddedToSuperVertex:
+                maxCliquesList.append({lordID})
 
         # remove finished cliques
         deletedCnt = 0
