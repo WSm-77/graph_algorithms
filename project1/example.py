@@ -201,6 +201,45 @@ def get_max_cliques(nonColisionGraph: dict[int, set[int]]):
 
     return maxCliquesList
 
+def does_create_clique(lordsList, nonColisionGraph):
+    lordsCnt = len(lordsList)
+
+    for firstIdx in range(lordsCnt):
+        firstLord = lordsList[firstIdx]
+        for secondIdx in range(firstIdx + 1, lordsCnt):
+            secondLord = lordsList[secondIdx]
+
+            if secondLord not in nonColisionGraph[firstLord]:
+                return False
+
+    return True
+
+def get_max_protected_route_length_brute_force(lordsRoutesLengths, nonColisionGraph):
+    lordsCnt = len(nonColisionGraph)
+
+    maxProtectedRouteLength = 0
+
+    for number in range(1, 2 ** lordsCnt):
+        lordsList = []
+
+        numberCp = number
+
+        for lordID in range(lordsCnt):
+            if numberCp % 2 == 1:
+                lordsList.append(lordID)
+
+            numberCp >>= 1
+
+        if does_create_clique(lordsList, nonColisionGraph):
+            currentRouteLenght = 0
+
+            for lordID in lordsList:
+                currentRouteLenght += lordsRoutesLengths[lordID]
+
+            maxProtectedRouteLength = max(maxProtectedRouteLength, currentRouteLenght)
+
+    return maxProtectedRouteLength
+
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     lordsCnt = len(lords)
 
