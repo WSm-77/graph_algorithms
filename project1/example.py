@@ -120,7 +120,7 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
 
         dfs_visit(startCity)
 
-    return streetObjects, lordsRoutesLengths, vertexProtectors
+    return lordsRoutesLengths, vertexProtectors
 
 def get_non_coliding_lords_graph(colisionGraph: dict[int, set[int]], lordsCnt):
     lordsSet = {lordID for lordID in range(lordsCnt)}
@@ -208,7 +208,7 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
 
     print(royalRouteGraph)
 
-    streetObjects, lordsRoutesLengths, vertexProtectors = lords_protection(royalRouteEdges, royalRouteGraph, lords)
+    lordsRoutesLengths, vertexProtectors = lords_protection(royalRouteEdges, royalRouteGraph, lords)
 
     print(lordsRoutesLengths)
     print(streetObjects)
