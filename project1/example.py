@@ -269,13 +269,9 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
 
     print(maxCliques)
 
-    maxSum = 0
-    for maxClique in maxCliques:
-        currentSum = 0
-        for lordID in maxClique:
-            currentSum += lordsRoutesLengths[lordID]
+    # return maxSum
 
-        maxSum = max(maxSum, currentSum)
+    return get_max_protected_route_length_brute_force(lordsRoutesLengths, nonColisionGraph)
 
     return maxSum
 
