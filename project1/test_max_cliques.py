@@ -1,7 +1,7 @@
 import unittest
 import os
 import json
-from example import get_non_coliding_lords_graph, bron_kerbosch
+from solution import get_non_coliding_lords_graph, bron_kerbosch
 
 class MaxClique(unittest.TestCase):
     def json_data_to_dict_graph(self, jsonDataGraph: dict[str, list[int]], convertKeys = lambda x: x, convertValues = lambda x: x):

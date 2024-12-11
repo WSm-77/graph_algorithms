@@ -1,7 +1,7 @@
 import unittest
 import os
 import json
-from example import get_adjustancy_list_graph, get_mst, lords_protection
+from solution import get_adjustancy_list_graph, get_mst, lords_protection
 
 class LordsProtection(unittest.TestCase):
     def json_data_to_dict_graph(self, jsonDataGraph: dict[str, list[int]], convertKeys = lambda x: x, convertValues = lambda x: x):
