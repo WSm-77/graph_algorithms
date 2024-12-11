@@ -149,58 +149,6 @@ def get_coliding_lords_graph(V, lordsCnt, vertexProtectors):
 
     return colisionsGraph
 
-def get_max_cliques(nonColisionGraph: dict[int, set[int]]):
-    maxCliquesList: list[set[int]] = []
-    potentialCliques: list[tuple[set[int], set[int]]] = []
-
-    for lordID in range(len(nonColisionGraph)):
-        toDeleteIndicies = []
-
-        neighbourLordsSet = nonColisionGraph[lordID] - {checkedLordID for checkedLordID in range(lordID)}
-        neighbourLordsSetCopy = {neighbour for neighbour in neighbourLordsSet}
-
-        isAddedToSuperVertex = False
-
-        for idx in range(len(potentialCliques)):
-
-            superVertex, potentialLordsInSuperVertex = potentialCliques[idx]
-
-            if lordID in potentialLordsInSuperVertex:
-                isAddedToSuperVertex = True
-
-                neighbourLordsIntersection = potentialLordsInSuperVertex & neighbourLordsSet
-                remainingNeighbourLords = potentialLordsInSuperVertex - neighbourLordsIntersection - {lordID}
-
-                neighbourLordsSetCopy = neighbourLordsSetCopy - neighbourLordsIntersection
-
-                # add current lord to super vertex
-                extendedSuperVertex = superVertex | {lordID}
-
-                if neighbourLordsIntersection:
-                    potentialCliques[idx] = (extendedSuperVertex, neighbourLordsIntersection)
-                else:
-                    maxCliquesList.append(extendedSuperVertex)
-                    toDeleteIndicies.append(idx)
-
-                if remainingNeighbourLords:
-                    potentialCliques.append((superVertex, remainingNeighbourLords))
-
-        if neighbourLordsSetCopy:
-            potentialCliques.append(({lordID}, neighbourLordsSetCopy))
-        else:
-            if not isAddedToSuperVertex:
-                maxCliquesList.append({lordID})
-
-        # remove finished cliques
-        deletedCnt = 0
-        for toDeleteInOriginalListIdx in toDeleteIndicies:
-            toDeleteIndex = toDeleteInOriginalListIdx - deletedCnt
-
-            del potentialCliques[toDeleteIndex]
-            deletedCnt += 1
-
-    return maxCliquesList
-
 def does_create_clique(lordsList, nonColisionGraph):
     lordsCnt = len(lordsList)
 
@@ -240,54 +188,48 @@ def get_max_protected_route_length_brute_force(lordsRoutesLengths, nonColisionGr
 
     return maxProtectedRouteLength
 
+def bron_kerbosch(graph: dict[int, set[int]]):
+    def backtrack(clique, remaining, excluded):
+        nonlocal maxCliques, graph
+        if not remaining and not excluded:
+            maxCliques.append(clique)
+            return
+
+        for vertex in remaining:
+            neighbours = graph[vertex]
+            backtrack(clique | {vertex}, remaining & neighbours, excluded & neighbours)
+            remaining = remaining - {vertex}
+            excluded = excluded | {vertex}
+
+    maxCliques = []
+
+    backtrack(set(), set(graph.keys()), set())
+
+    return maxCliques
+
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     lordsCnt = len(lords)
 
     royalRouteEdges = get_mst(V, streets)
 
-    print(streets)
-
     royalRouteGraph = get_adjustancy_list_graph(V, royalRouteEdges)
-
-    print(royalRouteGraph)
 
     lordsRoutesLengths, vertexProtectors = lords_protection(royalRouteEdges, royalRouteGraph, lords)
 
-    print(lordsRoutesLengths)
-    print(streetObjects)
-    print(vertexProtectors)
-
     colisionGraph = get_coliding_lords_graph(V, lordsCnt, vertexProtectors)
-
-    print(colisionGraph)
 
     nonColisionGraph = get_non_coliding_lords_graph(colisionGraph, lordsCnt)
 
-    print(nonColisionGraph)
+    maxCliques = bron_kerbosch(nonColisionGraph)
 
-    maxCliques = get_max_cliques(nonColisionGraph)
+    maxSum = 0
+    for maxClique in maxCliques:
+        currentSum = 0
+        for lordID in maxClique:
+            currentSum += lordsRoutesLengths[lordID]
 
-    print(maxCliques)
-
-    # return maxSum
-
-    return get_max_protected_route_length_brute_force(lordsRoutesLengths, nonColisionGraph)
+        maxSum = max(maxSum, currentSum)
 
     return maxSum
 
-result = solve(6, [
-    (1, 2, 4),
-    (2, 3, 5),
-    (3, 4, 6),
-    (4, 5, 8),
-    (5, 6, 7),
-    (1, 6, 9),
-    (2, 5, 10)],
-  [
-    [1, 3],
-    [2, 5],
-    [4, 6]])
-
-print(result)
-
-# runtests(solve)
+runtests(solve)

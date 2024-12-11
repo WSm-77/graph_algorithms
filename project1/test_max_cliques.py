@@ -1,7 +1,7 @@
 import unittest
 import os
 import json
-from example import get_non_coliding_lords_graph, get_max_cliques
+from example import get_non_coliding_lords_graph, bron_kerbosch
 
 class MaxClique(unittest.TestCase):
     def json_data_to_dict_graph(self, jsonDataGraph: dict[str, list[int]], convertKeys = lambda x: x, convertValues = lambda x: x):
@@ -25,7 +25,7 @@ class MaxClique(unittest.TestCase):
         # print(nonColisionGraph)
 
         # then
-        maxCliques = get_max_cliques(nonColisionGraph)
+        maxCliques = bron_kerbosch(nonColisionGraph)
         self.assertEqual(len(maxCliques), len(expected))
         for superVertex in maxCliques:
             self.assertIn(superVertex, expected)
@@ -35,7 +35,7 @@ class MaxClique(unittest.TestCase):
         testCasesDir = "test_cases"
         graphName = "colidingGraph2.json"
         fileName = os.path.join(testCasesDir, graphName)
-        expected = [{0, 1, 2, 3, 4}, {4, 5}, {3, 5}]
+        expected = [{0, 1, 2, 3, 4}, {3, 4, 5}]
 
         # when
         with open(fileName, "r") as file:
@@ -47,12 +47,12 @@ class MaxClique(unittest.TestCase):
 
         # print(nonColisionGraph)
 
-        maxCliques = get_max_cliques(nonColisionGraph)
+        maxCliques = bron_kerbosch(nonColisionGraph)
 
         # print(maxCliques)
 
         # then
-        maxCliques = get_max_cliques(nonColisionGraph)
+        maxCliques = bron_kerbosch(nonColisionGraph)
         self.assertEqual(len(maxCliques), len(expected))
         for superVertex in maxCliques:
             self.assertIn(superVertex, expected)
@@ -72,12 +72,12 @@ class MaxClique(unittest.TestCase):
 
         # print(nonColisionGraph)
 
-        maxCliques = get_max_cliques(nonColisionGraph)
+        maxCliques = bron_kerbosch(nonColisionGraph)
 
         # print(maxCliques)
 
         # then
-        maxCliques = get_max_cliques(nonColisionGraph)
+        maxCliques = bron_kerbosch(nonColisionGraph)
         self.assertEqual(len(maxCliques), len(expected))
         for superVertex in maxCliques:
             self.assertIn(superVertex, expected)
