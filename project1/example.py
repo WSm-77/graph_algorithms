@@ -188,6 +188,9 @@ def get_max_protected_route_length_brute_force(lordsRoutesLengths, nonColisionGr
 
     return maxProtectedRouteLength
 
+def get_pivot(setStructure: set):
+    return next(iter(setStructure))
+
 def bron_kerbosch(graph: dict[int, set[int]]):
     def backtrack(clique, remaining, excluded):
         nonlocal maxCliques, graph
@@ -195,7 +198,14 @@ def bron_kerbosch(graph: dict[int, set[int]]):
             maxCliques.append(clique)
             return
 
-        for vertex in remaining:
+        if not remaining:
+            return
+
+        pivot = get_pivot(remaining)
+        pivotNeighbours = graph[pivot]
+        disjointRemaining = remaining - pivotNeighbours
+
+        for vertex in disjointRemaining:
             neighbours = graph[vertex]
             backtrack(clique | {vertex}, remaining & neighbours, excluded & neighbours)
             remaining = remaining - {vertex}
