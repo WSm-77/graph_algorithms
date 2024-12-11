@@ -120,7 +120,7 @@ def lords_protection(royalRouteEdges: list[tuple[int, int, int]], royalRouteGrap
 
         dfs_visit(startCity)
 
-    return streetObjects, lordsRoutesLengths, vertexProtectors
+    return lordsRoutesLengths, vertexProtectors
 
 def get_non_coliding_lords_graph(colisionGraph: dict[int, set[int]], lordsCnt):
     lordsSet = {lordID for lordID in range(lordsCnt)}
@@ -149,82 +149,96 @@ def get_coliding_lords_graph(V, lordsCnt, vertexProtectors):
 
     return colisionsGraph
 
-def get_max_cliques(nonColisionGraph: dict[int, set[int]]):
-    maxCliquesList: list[set[int]] = []
-    potentialCliques: list[tuple[set[int], set[int]]] = []
+def does_create_clique(lordsList, nonColisionGraph):
+    lordsCnt = len(lordsList)
 
-    for lordID in nonColisionGraph.keys():
-        toDeleteIndicies = []
+    for firstIdx in range(lordsCnt):
+        firstLord = lordsList[firstIdx]
+        for secondIdx in range(firstIdx + 1, lordsCnt):
+            secondLord = lordsList[secondIdx]
 
-        neighbourLordsSet = nonColisionGraph[lordID]
+            if secondLord not in nonColisionGraph[firstLord]:
+                return False
 
-        if not neighbourLordsSet:
-            maxCliquesList.append({lordID})
-            continue
+    return True
 
-        for idx in range(len(potentialCliques)):
+def get_max_protected_route_length_brute_force(lordsRoutesLengths, nonColisionGraph):
+    lordsCnt = len(nonColisionGraph)
 
-            superVertex, potentialLordsInSuperVertex = potentialCliques[idx]
+    maxProtectedRouteLength = 0
 
-            if lordID in potentialLordsInSuperVertex:
-                neighbourLordsIntersection = potentialLordsInSuperVertex & neighbourLordsSet
-                remainingNeighbourLords = potentialLordsInSuperVertex - neighbourLordsIntersection - {lordID}
+    for number in range(1, 2 ** lordsCnt):
+        lordsList = []
 
-                # add current lord to super vertex
-                extendedSuperVertex = superVertex | {lordID}
+        numberCp = number
 
-                if neighbourLordsIntersection:
-                    potentialCliques[idx] = (extendedSuperVertex, neighbourLordsIntersection)
-                else:
-                    maxCliquesList.append(extendedSuperVertex)
-                    toDeleteIndicies.append(idx)
+        for lordID in range(lordsCnt):
+            if numberCp % 2 == 1:
+                lordsList.append(lordID)
 
-                if remainingNeighbourLords:
-                    potentialCliques.append((superVertex, remainingNeighbourLords))
+            numberCp >>= 1
 
-        neighbourLordsSet = neighbourLordsSet - {checkedLordID for checkedLordID in range(lordID)}
+        if does_create_clique(lordsList, nonColisionGraph):
+            currentRouteLenght = 0
 
-        if neighbourLordsSet:
-            potentialCliques.append(({lordID}, neighbourLordsSet))
+            for lordID in lordsList:
+                currentRouteLenght += lordsRoutesLengths[lordID]
 
-        # remove finished cliques
-        deletedCnt = 0
-        for toDeleteInOriginalListIdx in toDeleteIndicies:
-            toDeleteIndex = toDeleteInOriginalListIdx - deletedCnt
+            maxProtectedRouteLength = max(maxProtectedRouteLength, currentRouteLenght)
 
-            del potentialCliques[toDeleteIndex]
-            deletedCnt += 1
+    return maxProtectedRouteLength
 
-    return maxCliquesList
+def get_pivot(verticies: set, graph: dict[int, set[int]]):
+    maxDegree = -1
+    pivot = None
+    for vertex in verticies:
+        degree = len(graph[vertex])
+        if maxDegree < degree:
+            maxDegree  = degree
+            pivot = vertex
+
+    return pivot
+
+def bron_kerbosch(graph: dict[int, set[int]]):
+    def backtrack(clique, remaining, excluded):
+        nonlocal maxCliques, graph
+        if not remaining and not excluded:
+            maxCliques.append(clique)
+            return
+
+        if not remaining:
+            return
+
+        pivot = get_pivot(remaining, graph)
+        pivotNeighbours = graph[pivot]
+        disjointRemaining = remaining - pivotNeighbours
+
+        for vertex in disjointRemaining:
+            neighbours = graph[vertex]
+            backtrack(clique | {vertex}, remaining & neighbours, excluded & neighbours)
+            remaining = remaining - {vertex}
+            excluded = excluded | {vertex}
+
+    maxCliques = []
+
+    backtrack(set(), set(graph.keys()), set())
+
+    return maxCliques
 
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     lordsCnt = len(lords)
 
     royalRouteEdges = get_mst(V, streets)
 
-    print(streets)
-
     royalRouteGraph = get_adjustancy_list_graph(V, royalRouteEdges)
 
-    print(royalRouteGraph)
-
-    streetObjects, lordsRoutesLengths, vertexProtectors = lords_protection(royalRouteEdges, royalRouteGraph, lords)
-
-    print(lordsRoutesLengths)
-    print(streetObjects)
-    print(vertexProtectors)
+    lordsRoutesLengths, vertexProtectors = lords_protection(royalRouteEdges, royalRouteGraph, lords)
 
     colisionGraph = get_coliding_lords_graph(V, lordsCnt, vertexProtectors)
 
-    print(colisionGraph)
-
     nonColisionGraph = get_non_coliding_lords_graph(colisionGraph, lordsCnt)
 
-    print(nonColisionGraph)
-
-    maxCliques = get_max_cliques(nonColisionGraph)
-
-    print(maxCliques)
+    maxCliques = bron_kerbosch(nonColisionGraph)
 
     maxSum = 0
     for maxClique in maxCliques:
@@ -236,19 +250,4 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
 
     return maxSum
 
-result = solve(6, [
-    (1, 2, 4),
-    (2, 3, 5),
-    (3, 4, 6),
-    (4, 5, 8),
-    (5, 6, 7),
-    (1, 6, 9),
-    (2, 5, 10)],
-  [
-    [1, 3],
-    [2, 5],
-    [4, 6]])
-
-print(result)
-
-# runtests(solve)
+runtests(solve)
