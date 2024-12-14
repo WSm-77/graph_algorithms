@@ -6,7 +6,7 @@ class Node:
   def connect_to(self, v):
     self.neighbours.add(v)
 
-def create_graph(V, edgesList):
+def create_graph(edgesList, V):
     G: list[Node] = [None] + [Node(i) for i in range(1, V+1)]  # żeby móc indeksować numerem wierzchołka
 
     for (u, v, _) in edgesList:

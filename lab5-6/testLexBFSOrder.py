@@ -11,7 +11,7 @@ class LexBFS(unittest.TestCase):
         graphsDir = "chordal"
         graphName = "AT"
         V, graphEdges = loadWeightedGraph(os.path.join(graphsDir, graphName))
-        graph = create_graph(V, graphEdges)
+        graph = create_graph(graphEdges, V)
 
         # when
         order = lex_BFS(graph, V, 1)
@@ -23,10 +23,9 @@ class LexBFS(unittest.TestCase):
         # given
         graphsDir = "chordal"
 
-        cnt = 0
         for graphName in os.listdir(graphsDir):
             V, graphEdges = loadWeightedGraph(os.path.join(graphsDir, graphName))
-            graph = create_graph(V, graphEdges)
+            graph = create_graph(graphEdges, V)
 
             # when
             order = lex_BFS(graph, V, 1)
