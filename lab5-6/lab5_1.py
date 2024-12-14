@@ -1,33 +1,8 @@
 from graph import Node, create_graph
 from lexBFS import lex_BFS
+from POECheck import POECheck
 from utils.test import Test
 import dimacs
-
-class POECheck:
-    def __init__(self, lexOrder: list, graph: list[Node]):
-        self.lexSmallerNeighbors = {lexOrder[0] : set()}
-        self.parents = {lexOrder[0] : lexOrder[0]}
-
-        visitedSet = {lexOrder[0]}
-
-        n = len(lexOrder)
-
-        for idx in range(1, n):
-            vertex = lexOrder[idx]
-
-            self.lexSmallerNeighbors[vertex] = visitedSet & graph[vertex].neighbours
-
-            potentialParentIdx = idx - 1
-            while potentialParentIdx >= 0:
-                potentialParent = lexOrder[potentialParentIdx]
-
-                if potentialParent in self.lexSmallerNeighbors[vertex]:
-                    self.parents[vertex] = potentialParent
-                    break
-
-                potentialParentIdx -= 1
-
-            visitedSet.add(vertex)
 
 def get_first_set_element(setStruct: set):
     return next(iter(setStruct))
