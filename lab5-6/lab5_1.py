@@ -1,33 +1,52 @@
 from graph import Node, create_graph
+from lexBFS import lex_BFS
 from utils.test import Test
 import dimacs
+
+class POECheck:
+    def __init__(self, lexOrder: list, graph: list[Node]):
+        self.lexSmallerNeighbors = {lexOrder[0] : set()}
+        self.parents = {lexOrder[0] : None}
+
+        visitedSet = {lexOrder[0]}
+
+        n = len(lexOrder)
+
+        for idx in range(1, n):
+            vertex = lexOrder[idx]
+
+            self.lexSmallerNeighbors[vertex] = visitedSet & graph[vertex].neighbours
+
+            potentialParentIdx = idx - 1
+            while potentialParentIdx >= 0:
+                potentialParent = lexOrder[potentialParentIdx]
+
+                if potentialParent in self.lexSmallerNeighbors[vertex]:
+                    self.parents[vertex] = potentialParent
+                    break
+
+                potentialParentIdx -= 1
+
+            visitedSet.add(vertex)
+
+
 
 def get_first_set_element(setStruct: set):
     return next(iter(setStruct))
 
-def is_chordal(graph: list[Node], V: int, source: int):
-    visitOrder = []
-    visitedSet = set()
+def is_chordal(graph: list[Node], V: int, source: int = 1):
+    lexOrder = lex_BFS(graph, V, source)
+    poeCheck = POECheck(lexOrder, graph)
 
-    verticisSet = set(range(1, V + 1))
-    verticisSet.remove(source)
-    toCheck = [verticisSet, {source}]
+    print(poeCheck.lexSmallerNeighbors)
+    print(poeCheck.parents)
 
-    vertexParent = None
-    parentLexSmallerNeighbours = set()
+    # return
 
-    while toCheck:
-        vertex = get_first_set_element(toCheck[-1])
-
-        toCheck[-1].remove(vertex)
-
-        # check if last set is empty
-        if not toCheck[-1]:
-            toCheck.pop()
-
-
-        neighbours = graph[vertex].neighbours
-        lexSmallerNeighbours = visitedSet & neighbours
+    for vertex in range(2, V + 1):
+        lexSmallerNeighbours = poeCheck.lexSmallerNeighbors[vertex]
+        vertexParent = poeCheck.parents[vertex]
+        parentLexSmallerNeighbours = poeCheck.lexSmallerNeighbors[vertexParent]
 
         print("##################")
         print()
@@ -40,24 +59,6 @@ def is_chordal(graph: list[Node], V: int, source: int):
 
         if not lexSmallerNeighbours - {vertexParent} <= parentLexSmallerNeighbours:
             return False
-
-        visitOrder.append(vertex)
-        visitedSet.add(vertex)
-
-        newToCheck = []
-
-        for toCheckSet in toCheck:
-            vertexNeighboursIntersection = toCheckSet & neighbours
-            remaining = toCheckSet - vertexNeighboursIntersection
-            if remaining:
-                newToCheck.append(remaining)
-
-            if vertexNeighboursIntersection:
-                newToCheck.append(vertexNeighboursIntersection)
-
-        toCheck = newToCheck
-        vertexParent = vertex
-        parentLexSmallerNeighbours = lexSmallerNeighbours
 
     return True
 
@@ -75,3 +76,4 @@ if __name__ == "__main__":
     myTest = Test(graphsDir, dimacs.loadDirectedWeightedGraph, lambda x: dimacs.readSolution(x) != 0, create_graph, is_chordal, 1)
     graphName = "AT"
     myTest.test_graph(graphName)
+    myTest.test_all()
