@@ -3,6 +3,23 @@ import sys
 
 sys.setrecursionlimit(10_000)
 
+class POECheck:
+    def __init__(self, lexOrder: list, graph: dict[int, set[int]]):
+        self.lexOrder = lexOrder
+        self.lexSmallerNeighbors = {lexOrder[0] : set()}
+        self.parents = {lexOrder[0] : lexOrder[0]}
+
+        visitedSet = {lexOrder[0]}
+
+        n = len(lexOrder)
+
+        for idx in range(1, n):
+            vertex = lexOrder[idx]
+
+            self.lexSmallerNeighbors[vertex] = visitedSet & graph[vertex]
+
+            visitedSet.add(vertex)
+
 class FindUnion:
     def __init__(self, V) -> None:
         self.representants = {vertex : vertex for vertex in range(1, V + 1)}
@@ -225,6 +242,92 @@ def bron_kerbosch(graph: dict[int, set[int]]):
 
     return maxCliques
 
+def get_first_set_element(setStruct: set):
+    return next(iter(setStruct))
+
+def lex_BFS(graph: dict[int, set[int]], V: int, source: int = 0):
+    visitOrder = []
+    visitedSet = set()
+
+    verticisSet = set(range(V))
+    verticisSet.remove(source)
+    toCheck = [verticisSet, {source}]
+
+    while toCheck:
+        vertex = get_first_set_element(toCheck[-1])
+
+        toCheck[-1].remove(vertex)
+
+        # check if last set is empty
+        if not toCheck[-1]:
+            toCheck.pop()
+
+        neighbours = graph[vertex]
+
+        visitOrder.append(vertex)
+        visitedSet.add(vertex)
+
+        newToCheck = []
+
+        for toCheckSet in toCheck:
+            vertexNeighboursIntersection = toCheckSet & neighbours
+            remaining = toCheckSet - vertexNeighboursIntersection
+            if remaining:
+                newToCheck.append(remaining)
+
+            if vertexNeighboursIntersection:
+                newToCheck.append(vertexNeighboursIntersection)
+
+        toCheck = newToCheck
+
+    return visitOrder
+
+def find_independent_set_with_max_weight(lordsColisionGraph: dict[int, set[int]], lordsPathLengths: dict[int, int]):
+    V = len(lordsColisionGraph)
+
+    lexOrder = lex_BFS(lordsColisionGraph, V)
+
+    poeCheck = POECheck(lexOrder, lordsColisionGraph)
+
+    BLUE = 0
+    RED = 1
+
+    colours = {lordID : None for lordID in lordsColisionGraph.keys()}
+    weightsCopy = {key : value for key, value in lordsPathLengths.items()}
+
+    for lordID in reversed(lexOrder):
+        if weightsCopy[lordID] <= 0:
+            weightsCopy[lordID] = 0
+            continue
+
+        colours[lordID] = RED
+
+        for lexSmallerNeighbour in poeCheck.lexSmallerNeighbors[lordID]:
+            weightsCopy[lexSmallerNeighbour] -= weightsCopy[lordID]
+            if weightsCopy[lexSmallerNeighbour] < 0:
+                weightsCopy[lexSmallerNeighbour] = 0
+
+        weightsCopy[lordID] = 0
+
+    blueVertices = set()
+
+    for lordID in lexOrder:
+        if colours[lordID] != RED:
+            continue
+
+        hasBlueNeighbours = False
+
+        for neighbour in lordsColisionGraph[lordID]:
+            if neighbour in blueVertices:
+                hasBlueNeighbours = True
+                break
+
+        if not hasBlueNeighbours:
+            colours[lordID] = BLUE
+            blueVertices.add(lordID)
+
+    return blueVertices
+
 def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
     lordsCnt = len(lords)
 
@@ -236,17 +339,12 @@ def solve(V: int, streets: list[tuple[int, int, int]], lords: list[int]):
 
     colisionGraph = get_coliding_lords_graph(V, lordsCnt, vertexProtectors)
 
-    nonColisionGraph = get_non_coliding_lords_graph(colisionGraph, lordsCnt)
-
-    maxCliques = bron_kerbosch(nonColisionGraph)
+    heaviestIndependentSet = find_independent_set_with_max_weight(colisionGraph, lordsRoutesLengths)
 
     maxSum = 0
-    for maxClique in maxCliques:
-        currentSum = 0
-        for lordID in maxClique:
-            currentSum += lordsRoutesLengths[lordID]
 
-        maxSum = max(maxSum, currentSum)
+    for lordID in heaviestIndependentSet:
+        maxSum += lordsRoutesLengths[lordID]
 
     return maxSum
 
