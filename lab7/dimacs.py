@@ -4,14 +4,14 @@
 
 
 def loadCNFFormula( name ):
-  """Load a CNF formula in the DIMACS ascii format from 
+  """Load a CNF formula in the DIMACS ascii format from
      the file "name" and return it as a list of clauses
      Returns (V,F)
      V -- highest variable number
      F -- list of clauses"""
 
   V = 0
-  L = []  
+  L = []
 
   f = open( name, "r" )
   lines = f.readlines()
@@ -19,7 +19,6 @@ def loadCNFFormula( name ):
     s = l.split()
     if(len(s) < 1): continue
     if( s[0] == "c" ):
-      print(s)
       continue
     elif( s[0] == "p" ):
       V = int(s[2])
@@ -33,14 +32,14 @@ def loadCNFFormula( name ):
 
 
 def loadWeightedGraph( name ):
-  """Load a graph in the DIMACS ascii format (with weights) from 
+  """Load a graph in the DIMACS ascii format (with weights) from
      the file "name" and return it as a list of sets
      Returns (V,L)
      V -- number of vertices (1, ..., V)
      L -- list of edges in the format (x,y,w): edge between x and y with weight w (x<y)"""
 
   V = 0
-  L = []  
+  L = []
 
   f = open( name, "r" )
   lines = f.readlines()
