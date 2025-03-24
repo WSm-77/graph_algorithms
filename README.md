@@ -4,9 +4,11 @@ This repository contains graphs algorithms realted to the topic of flows and min
 
 ## Setup
 
-__Note__: It is recommended to use Linux for this repository.
+> [!TIP]
+> It is recommended to use Linux for this repository.
 
-__Remeber__: All commands should be executed in project's root directory.
+> [!IMPORTANT]
+> All commands should be executed in project's root directory.
 
 To properly setup this repository you need to create virtual environment with following command:
 
